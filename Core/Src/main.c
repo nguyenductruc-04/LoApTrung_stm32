@@ -78,16 +78,19 @@ static void MX_TIM2_Init(void);
 
 	void AutoControl(float temp) {			// ham dieu khien den LED theo nguong nhiet do cai dat
 		
+		float tempdelay = 0.5; //  khoang tre
+		float upperThreshold = tempThreshold + tempdelay;
+		float lowerThreshold = tempThreshold - tempdelay;
 
 		
 		if (HAL_GetTick() - last_check_time >= 1000) {	
        last_check_time = HAL_GetTick();
 
-       if (temp < tempThreshold && led_state == 0) {			// Neu nhiet do lo ap < nhiet do cai dat && trang thai LED tat
+       if (temp < lowerThreshold && led_state == 0) {			// Neu nhiet do lo ap < nhiet do cai dat && trang thai LED tat
 				 HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);  // Bat LED
 				 led_state = 1;			// Ghi lai trang thai cua LED
 			 } 
-			 else if (temp > tempThreshold && led_state == 1) 			// Neu nhiet do lo ap < nhiet do cai dat && trang thai LED tat
+			 else if (temp > upperThreshold && led_state == 1) 			// Neu nhiet do lo ap < nhiet do cai dat && trang thai LED tat
 			 {
 				 HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);  // Tat LED
 				 led_state = 0;			// Ghi lai trang thai cua LED
@@ -101,11 +104,11 @@ static void MX_TIM2_Init(void);
     last_button_press = HAL_GetTick();
 		
     if (GPIO_Pin == GPIO_PIN_0) { // Nut tang
-        tempThreshold += 1.0;			// Tang nhiet do len 1
+        tempThreshold += 0.5;			// Tang nhiet do len 0.5
 			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);			// Den LED_ PC13 thong bao nut nhan
 
     } else if (GPIO_Pin == GPIO_PIN_1) { // Nut giam
-        tempThreshold -= 1.0;			// Giam nhiet do xuong 1
+        tempThreshold -= 0.5;			// Giam nhiet do xuong 0.5
 			HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);		// Den LED_ PC13 thong bao nut nhan
     }
 
@@ -177,7 +180,6 @@ int main(void)
 		lcd_put_cur(0, 9);
 		sprintf(buffer, "%.2f C", tempThreshold);			
 		lcd_send_string(buffer);
-			//temp = Max6675_Read_Temp();
 
 			if (temp != prev_temp) {
         lcd_put_cur(1, 0);
